@@ -11,7 +11,6 @@ import {
 	Stack,
 } from '@chakra-ui/react';
 import { useEffect } from 'react';
-import { IoCloseCircleSharp } from 'react-icons/io5';
 import { HiOutlineClipboardList } from 'react-icons/hi';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -29,6 +28,8 @@ const OrderListScreen = () => {
 	const userLogin = useSelector((state) => state.userLogin);
 	const { userInfo } = userLogin;
 
+	// ✅ Hooks at top level
+	const pageBg = useColorModeValue('gray.100', 'gray.900');
 	const cardBg = useColorModeValue('white', 'gray.800');
 	const cardHoverBg = useColorModeValue('gray.50', 'gray.700');
 
@@ -53,9 +54,11 @@ const OrderListScreen = () => {
 				<Loader />
 			) : error ? (
 				<Message type="error">{error}</Message>
+			) : orders.length === 0 ? (
+				<Message type="info">No orders placed yet.</Message>
 			) : (
 				<Box
-					bg={useColorModeValue('gray.100', 'gray.900')}
+					bg={pageBg}
 					p={{ base: 2, md: 5 }}
 					rounded="lg"
 					mx={{ base: 2, md: 10 }}
@@ -100,10 +103,14 @@ const OrderListScreen = () => {
 
 									<Flex gap={2} flexWrap="wrap">
 										<Badge colorScheme={order.isPaid ? 'green' : 'red'}>
-											{order.isPaid ? `Paid: ${order.paidAt.substring(0, 10)}` : 'Not Paid'}
+											{order.isPaid
+												? `Paid: ${order.paidAt.substring(0, 10)}`
+												: 'Not Paid'}
 										</Badge>
 										<Badge colorScheme={order.isDelivered ? 'green' : 'red'}>
-											{order.isDelivered ? `Delivered: ${order.deliveredAt.substring(0, 10)}` : 'Not Delivered'}
+											{order.isDelivered
+												? `Delivered: ${order.deliveredAt.substring(0, 10)}`
+												: 'Not Delivered'}
 										</Badge>
 									</Flex>
 								</Stack>
