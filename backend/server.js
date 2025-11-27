@@ -1,8 +1,8 @@
 import colors from "colors";
 import dotenv from "dotenv";
 import express from "express";
+import cors from "cors";          // <-- Add this
 import path from "path";
-import cors from "cors";
 
 import connectDB from "./config/db.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
@@ -12,55 +12,44 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
-
-// Connect DB
 connectDB();
 
 const app = express();
-
-// Body Parsers
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ---------------------
-// ✅ CORS FIX
-// ---------------------
+// -------------------- CORS FIX --------------------
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
-      "https://rststore.netlify.app",   // 👈 REPLACE THIS
+      "https://rststore.netlify.app", // your frontend URL
+      "http://localhost:3000",                          // local dev
     ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
-// ---------------------
-// API ROUTES
-// ---------------------
+// Allow OPTIONS method for preflight
+app.options("*", cors());
+// ---------------------------------------------------
+
+// API Routes
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/uploads", uploadRoutes);
 
-// ---------------------
-// Root Route
-// ---------------------
+// Test Route
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("API is running");
 });
 
-// ---------------------
 // Error Middlewares
-// ---------------------
 app.use(notFound);
 app.use(errorHandler);
 
-// ---------------------
-// Start Server
-// ---------------------
+// Server Start
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
