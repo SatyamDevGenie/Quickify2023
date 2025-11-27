@@ -1,7 +1,7 @@
 import colors from "colors";
 import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";          // <-- Add this
+import cors from "cors";
 import path from "path";
 
 import connectDB from "./config/db.js";
@@ -17,12 +17,15 @@ connectDB();
 const app = express();
 app.use(express.json());
 
+// ⭐ Required for Render
+app.set("trust proxy", 1);
+
 // -------------------- CORS FIX --------------------
 app.use(
   cors({
     origin: [
-      "https://rststore.netlify.app", // your frontend URL
-      "http://localhost:3000",                          // local dev
+      "https://superlative-manatee-994c79.netlify.app", // your real frontend
+      "http://localhost:3000",                         // local dev
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -30,9 +33,12 @@ app.use(
   })
 );
 
-// Allow OPTIONS method for preflight
 app.options("*", cors());
 // ---------------------------------------------------
+
+// Uploads folder (important!)
+const __dirname = path.resolve();
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 // API Routes
 app.use("/api/products", productRoutes);
