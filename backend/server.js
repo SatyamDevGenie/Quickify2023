@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://rststore.netlify.app", // your frontend URL
+      "https://rst-store.netlify.app", // your frontend URL
       "http://localhost:3000",                          // local dev
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
