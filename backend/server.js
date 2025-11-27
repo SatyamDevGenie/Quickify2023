@@ -24,7 +24,7 @@ app.set("trust proxy", 1);
 app.use(
   cors({
     origin: [
-      "https://superlative-manatee-994c79.netlify.app", // your real frontend
+      "https://rststore.netlify.app", // your real frontend
       "http://localhost:3000",                         // local dev
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
