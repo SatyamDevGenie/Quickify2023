@@ -25,13 +25,14 @@ app.use(
   cors({
     origin: [
       "https://rststore.netlify.app", // your real frontend
-      "http://localhost:3000",                         // local dev
+      "http://localhost:3000",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+
 
 app.options("*", cors());
 // ---------------------------------------------------
