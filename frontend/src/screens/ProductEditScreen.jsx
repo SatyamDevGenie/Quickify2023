@@ -22,6 +22,7 @@ export default function ProductEditScreen() {
   const [description, setDescription] = useState('');
   const [countInStock, setCountInStock] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   const { selectedProduct: product, productLoading: loading, productError: error } = useSelector((state) => state.products);
   const { updateLoading: loadingUpdate, updateError: errorUpdate, updateSuccess: successUpdate } = useSelector((state) => state.products);
@@ -153,13 +154,35 @@ export default function ProductEditScreen() {
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
-                    <input
-                      type="text"
-                      placeholder="Enter description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full rounded border border-gray-300 px-3 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                    />
+                    <div className="flex flex-col gap-2">
+                      <textarea
+                        placeholder="Enter description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      />
+                      <button
+                        type="button"
+                        disabled={generatingDesc}
+                        onClick={async () => {
+                          try {
+                            setGeneratingDesc(true);
+                            const { data } = await api.post(`/ai/products/${productId}/generate-description`);
+                            setDescription(data.description || '');
+                            toast.success('AI description generated. You can edit it before saving.');
+                          } catch (err) {
+                            console.error(err);
+                            toast.error('Failed to generate description.');
+                          } finally {
+                            setGeneratingDesc(false);
+                          }
+                        }}
+                        className="inline-flex w-full items-center justify-center rounded border border-primary-500 px-3 py-2 text-xs font-semibold text-primary-600 transition hover:bg-primary-50 disabled:opacity-50 sm:w-auto"
+                      >
+                        {generatingDesc ? 'Generating with AI…' : 'Generate with AI'}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">Brand</label>

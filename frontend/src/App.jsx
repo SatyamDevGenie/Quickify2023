@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import AIChatWidget from './components/AIChatWidget';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import HomeScreen from './screens/HomeScreen';
@@ -43,6 +44,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <AIChatWidget />
       <ToastContainer
         position="top-right"
         autoClose={4000}

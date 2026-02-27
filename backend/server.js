@@ -6,6 +6,7 @@ import path from "path";
 
 import connectDB from "./config/db.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
+import aiRoutes from "./routes/aiRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
@@ -26,6 +27,7 @@ app.use(
     origin: [
       "https://rststore.netlify.app", // your real frontend
       "http://localhost:3000",
+      "http://localhost:5173",       // Vite dev server
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -42,6 +44,7 @@ const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 // API Routes
+app.use("/api/ai", aiRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);

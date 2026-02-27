@@ -8,6 +8,7 @@ import {
   clearReviewSuccess,
 } from '../store/slices/productsSlice';
 import { addToCart } from '../store/slices/cartSlice';
+import api from '../lib/api';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Rating from '../components/Rating';
@@ -21,6 +22,8 @@ export default function ProductScreen() {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [reviewSummary, setReviewSummary] = useState(null);
+  const [reviewSummaryLoading, setReviewSummaryLoading] = useState(false);
 
   const { selectedProduct: product, productLoading: loading, productError: error } = useSelector((state) => state.products);
   const { userInfo } = useSelector((state) => state.auth);
@@ -40,6 +43,27 @@ export default function ProductScreen() {
   useEffect(() => {
     if (errorProductReview) toast.error(errorProductReview);
   }, [errorProductReview]);
+
+  useEffect(() => {
+    if (!product?.reviews?.length) {
+      setReviewSummary(null);
+      return;
+    }
+    let cancelled = false;
+    setReviewSummaryLoading(true);
+    api
+      .get(`/ai/products/${product._id}/review-summary`)
+      .then(({ data }) => {
+        if (!cancelled && data.summary) setReviewSummary(data.summary);
+      })
+      .catch(() => {
+        if (!cancelled) setReviewSummary(null);
+      })
+      .finally(() => {
+        if (!cancelled) setReviewSummaryLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [product?._id, product?.reviews?.length]);
 
   const addToCartHandler = () => {
     dispatch(addToCart({ id, qty }));
@@ -131,6 +155,17 @@ export default function ProductScreen() {
             className="mt-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:mt-10 sm:p-6 md:p-8"
           >
             <h3 className="mb-4 text-lg font-bold text-slate-800 sm:mb-6">Reviews</h3>
+
+            {product.reviews?.length > 0 && (
+              <div className="mb-6 rounded-lg border border-primary-100 bg-primary-50/50 p-4">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary-600">AI Summary</p>
+                {reviewSummaryLoading ? (
+                  <p className="text-sm text-slate-500">Summarizing reviews…</p>
+                ) : reviewSummary ? (
+                  <p className="text-sm leading-relaxed text-slate-700">{reviewSummary}</p>
+                ) : null}
+              </div>
+            )}
 
             {!product.reviews?.length ? (
               <Message>No reviews yet. Be the first to review!</Message>
