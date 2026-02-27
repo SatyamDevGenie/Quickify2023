@@ -1,7 +1,8 @@
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   deliverOrder,
   fetchOrderById,
@@ -16,12 +17,16 @@ const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'Ade_MnCXzZUYn
 
 export default function OrderScreen() {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { id: orderId } = useParams();
+  const [showDeliveredMessage, setShowDeliveredMessage] = useState(false);
 
-  const { orderDetails: order, orderLoading: loading, orderError: error } = useSelector((state) => state.orders);
+  const { orderDetails: order, orderLoading: loading, orderError: error, deliverSuccess } = useSelector((state) => state.orders);
   const { payLoading: loadingPay } = useSelector((state) => state.orders);
   const { deliverLoading: loadingDeliver } = useSelector((state) => state.orders);
   const { userInfo } = useSelector((state) => state.auth);
+
+  const orderPlacedEmailSent = location.state?.orderPlaced === true;
 
   useEffect(() => {
     dispatch(clearPaySuccess());
@@ -30,6 +35,16 @@ export default function OrderScreen() {
       dispatch(fetchOrderById(orderId));
     }
   }, [dispatch, orderId, order?._id]);
+
+  useEffect(() => {
+    if (deliverSuccess && order?.isDelivered) {
+      toast.success('Order marked as delivered. Customer has been notified.');
+      setShowDeliveredMessage(true);
+      dispatch(clearDeliverSuccess());
+      const t = setTimeout(() => setShowDeliveredMessage(false), 6000);
+      return () => clearTimeout(t);
+    }
+  }, [deliverSuccess, order?.isDelivered, dispatch]);
 
   const itemsPrice = order?.orderItems?.reduce((acc, item) => acc + item.price * item.qty, 0) ?? 0;
 
@@ -43,6 +58,7 @@ export default function OrderScreen() {
         email_address: details.payer?.email_address,
       },
     }));
+    toast.success('Payment completed successfully.');
   };
 
   const deliverHandler = () => {
@@ -54,11 +70,21 @@ export default function OrderScreen() {
   if (!order) return null;
 
   return (
-    <div className="flex w-full flex-col py-8">
-      <div className="grid gap-8 md:grid-cols-[3fr_2fr]">
-        <div className="flex flex-col gap-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-2xl font-bold">Shipping</h2>
+    <div className="mx-auto max-w-6xl flex w-full flex-col px-3 py-6 sm:py-8 md:px-6">
+      {orderPlacedEmailSent && (
+        <Message type="success" className="mb-4">
+          Order placed successfully! A confirmation email has been sent to your email.
+        </Message>
+      )}
+      {showDeliveredMessage && userInfo?.isAdmin && (
+        <Message type="success" className="mb-4">
+          Order marked as delivered. A confirmation email has been sent to the customer.
+        </Message>
+      )}
+      <div className="grid gap-6 md:grid-cols-[3fr_2fr] md:gap-8">
+        <div className="flex flex-col gap-4 sm:gap-6">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-3 text-lg font-bold text-slate-800 sm:text-xl">Shipping</h2>
             <p><strong>Name:</strong> {order.user?.name}</p>
             <p>
               <strong>Email:</strong>{' '}
@@ -79,8 +105,8 @@ export default function OrderScreen() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-2xl font-bold">Payment Method</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-3 text-lg font-bold text-slate-800 sm:text-xl">Payment</h2>
             <p><strong>Method:</strong> {(order.paymentMethod || '').toUpperCase()}</p>
             <div className="mt-4">
               {order.isPaid ? (
@@ -91,8 +117,8 @@ export default function OrderScreen() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-2xl font-bold">Order Items</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-3 text-lg font-bold text-slate-800 sm:text-xl">Order Items</h2>
             {!order.orderItems?.length ? (
               <Message>No Order Info</Message>
             ) : (
@@ -122,8 +148,8 @@ export default function OrderScreen() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-lg">
-          <h2 className="mb-6 text-center text-2xl font-bold">Order Summary</h2>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-md sm:p-6 lg:sticky lg:top-24">
+          <h2 className="mb-4 text-center text-xl font-bold text-slate-800">Order Summary</h2>
 
           <div className="flex flex-col gap-4">
             <div className="flex justify-between">
@@ -180,9 +206,10 @@ export default function OrderScreen() {
             <button
               type="button"
               onClick={deliverHandler}
-              className="mt-6 w-full rounded bg-primary-500 py-3 text-lg font-medium text-white hover:bg-primary-600"
+              disabled={loadingDeliver}
+              className="mt-6 w-full rounded-lg bg-primary-500 py-3 text-sm font-medium text-white transition hover:bg-primary-600 disabled:opacity-50 sm:text-base"
             >
-              Mark as Delivered
+              {loadingDeliver ? 'Updating...' : 'Mark as Delivered'}
             </button>
           )}
         </div>

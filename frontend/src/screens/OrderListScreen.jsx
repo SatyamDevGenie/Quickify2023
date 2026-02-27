@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { HiOutlineClipboardList } from 'react-icons/hi';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { fetchAllOrders } from '../store/slices/ordersSlice';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
@@ -21,11 +22,15 @@ export default function OrderListScreen() {
     }
   }, [dispatch, userInfo, navigate]);
 
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
+
   return (
-    <>
-      <div className="mb-6 flex items-center justify-center">
-        <HiOutlineClipboardList className="mr-3 h-8 w-8 text-primary-500" />
-        <h1 className="text-center text-2xl font-bold md:text-3xl">Order Management</h1>
+    <div className="mx-auto max-w-6xl px-3 py-4 sm:py-6">
+      <div className="mb-6 flex items-center justify-center gap-2 sm:mb-8">
+        <HiOutlineClipboardList className="h-7 w-7 text-primary-500 sm:h-8 sm:w-8" />
+        <h1 className="text-center text-2xl font-bold text-slate-800 md:text-3xl">Order Management</h1>
       </div>
 
       {loading ? (
@@ -35,12 +40,12 @@ export default function OrderListScreen() {
       ) : !orders?.length ? (
         <Message type="info">No orders placed yet.</Message>
       ) : (
-        <div className="mx-2 rounded-lg bg-gray-100 p-2 md:mx-10 md:p-5">
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3">
             {orders.map((order) => (
               <div
                 key={order._id}
-                className="rounded-md border border-gray-200 bg-white p-5 shadow-md transition-all hover:shadow-xl"
+                className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 shadow-sm transition hover:shadow-md sm:p-5"
               >
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
@@ -85,6 +90,6 @@ export default function OrderListScreen() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

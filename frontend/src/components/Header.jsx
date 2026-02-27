@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { HiOutlineMenuAlt3, HiShoppingBag, HiUser } from 'react-icons/hi';
 import { IoChevronDown } from 'react-icons/io5';
 import { logout } from '../store/slices/authSlice';
@@ -32,26 +33,30 @@ export default function Header() {
     dispatch(clearOrderDetails());
     dispatch(clearUsersList());
     dispatch(clearSelectedUser());
+    toast.info('You have been signed out.');
     navigate('/login');
   };
 
   return (
-    <header className="fixed left-0 top-0 z-[99999] flex w-full flex-wrap items-center justify-between bg-black px-6 py-6">
-      <Link to="/" className="font-black text-white/90 tracking-wide text-[1.8rem] no-underline">
+    <header className="fixed left-0 top-0 z-[99999] flex w-full flex-wrap items-center justify-between gap-3 bg-slate-900 px-4 py-3 shadow-lg sm:px-5 md:px-6 md:py-4">
+      <Link
+        to="/"
+        className="text-lg font-bold tracking-tight text-white no-underline sm:text-xl md:text-2xl"
+      >
         CartBuddy
       </Link>
 
       <button
         type="button"
-        className="block md:hidden"
+        className="flex h-10 w-10 items-center justify-center rounded-lg text-white transition hover:bg-white/10 md:hidden"
         onClick={() => setShow(!show)}
-        aria-label="Menu"
+        aria-label="Toggle menu"
       >
-        <HiOutlineMenuAlt3 className="h-6 w-6 text-white" />
+        <HiOutlineMenuAlt3 className="h-6 w-6" />
       </button>
 
       <nav
-        className={`flex flex-wrap items-center gap-2 md:gap-4 ${show ? 'block w-full' : 'hidden w-full'} mt-4 md:mt-0 md:flex md:w-auto`}
+        className={`flex w-full flex-col gap-2 rounded-lg bg-slate-800/50 p-3 md:mt-0 md:flex md:w-auto md:flex-row md:items-center md:gap-3 md:bg-transparent md:p-0 ${show ? 'flex' : 'hidden md:flex'}`}
       >
         <HeaderMenuItem icon={HiShoppingBag} label="Cart" url="/cart" />
 
@@ -60,16 +65,16 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="inline-flex items-center rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center justify-between rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700 md:w-auto md:min-w-[140px]"
             >
-              {userInfo.name}
-              <IoChevronDown className="ml-1 h-4 w-4" />
+              <span className="truncate">{userInfo.name}</span>
+              <IoChevronDown className="ml-1 h-4 w-4 shrink-0" />
             </button>
             {userMenuOpen && (
-              <div className="absolute right-0 mt-1 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 left-0 mt-1 w-full min-w-[180px] rounded-lg border border-slate-600 bg-white py-1 shadow-xl md:left-auto md:w-48">
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-100"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   Profile
@@ -77,7 +82,7 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => { setUserMenuOpen(false); logoutHandler(); }}
-                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  className="block w-full px-4 py-2.5 text-left text-sm text-gray-700 transition hover:bg-gray-100"
                 >
                   Logout
                 </button>
@@ -93,30 +98,30 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setAdminMenuOpen(!adminMenuOpen)}
-              className="inline-flex items-center rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center justify-between rounded-lg border border-primary-400/50 bg-primary-500/20 px-3 py-2 text-sm font-medium text-primary-100 transition hover:bg-primary-500/30 md:w-auto md:min-w-[120px]"
             >
               Manage
-              <IoChevronDown className="ml-1 h-4 w-4" />
+              <IoChevronDown className="ml-1 h-4 w-4 shrink-0" />
             </button>
             {adminMenuOpen && (
-              <div className="absolute right-0 mt-1 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 left-0 mt-1 w-full min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-xl md:left-auto md:w-48">
                 <Link
                   to="/admin/userlist"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-100"
                   onClick={() => setAdminMenuOpen(false)}
                 >
                   All Users
                 </Link>
                 <Link
                   to="/admin/productlist"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-100"
                   onClick={() => setAdminMenuOpen(false)}
                 >
                   All Products
                 </Link>
                 <Link
-                  to="/admin/orderlist"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  to="/admin/orderList"
+                  className="block px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-100"
                   onClick={() => setAdminMenuOpen(false)}
                 >
                   All Orders

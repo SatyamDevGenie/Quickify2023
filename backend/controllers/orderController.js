@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 
 import Order from "../models/orderModel.js";
+import { sendOrderPlacedEmail, sendOrderDeliveredEmail } from "../utils/emailService.js";
 
 /**
  * @desc		Create new order
@@ -34,6 +35,13 @@ const createOrder = asyncHandler(async (req, res) => {
       totalPrice,
     });
     const createdOrder = await order.save();
+    // Send "order placed" email to user (from admin email)
+    sendOrderPlacedEmail(
+      req.user.email,
+      req.user.name,
+      createdOrder._id.toString(),
+      createdOrder.totalPrice
+    ).catch(() => {});
     res.status(201).json(createdOrder);
   }
 });
@@ -109,13 +117,21 @@ const getOrders = asyncHandler(async (req, res) => {
  * @access	private/admin
  */
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
-	const order = await Order.findById(req.params.id);
+	const order = await Order.findById(req.params.id).populate("user", "name email");
 
 	if (order) {
 		order.isDelivered = true;
 		order.deliveredAt = Date.now();
 
 		const updatedOrder = await order.save();
+		// Send "order delivered" email to user (from admin email)
+		if (order.user && order.user.email) {
+			sendOrderDeliveredEmail(
+				order.user.email,
+				order.user.name,
+				order._id.toString()
+			).catch(() => {});
+		}
 		res.json(updatedOrder);
 	} else {
 		res.status(404);

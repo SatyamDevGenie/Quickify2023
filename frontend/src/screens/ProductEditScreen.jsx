@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { FaArrowLeft } from 'react-icons/fa';
 import { fetchProductById, updateProduct, clearUpdateSuccess } from '../store/slices/productsSlice';
 import api from '../lib/api';
@@ -26,7 +27,12 @@ export default function ProductEditScreen() {
   const { updateLoading: loadingUpdate, updateError: errorUpdate, updateSuccess: successUpdate } = useSelector((state) => state.products);
 
   useEffect(() => {
+    if (errorUpdate) toast.error(errorUpdate);
+  }, [errorUpdate]);
+
+  useEffect(() => {
     if (successUpdate) {
+      toast.success('Product updated successfully.');
       dispatch(clearUpdateSuccess());
       navigate('/admin/productlist');
     } else {
@@ -72,27 +78,29 @@ export default function ProductEditScreen() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setImage(data?.url || data?.secure_url || data);
+      toast.success('Image uploaded.');
     } catch (err) {
       console.error(err);
+      toast.error('Image upload failed.');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <>
-      <div className="px-8 py-4">
-        <Link
-          to="/admin/productlist"
-          className="mb-5 inline-flex items-center justify-center rounded bg-primary-500 p-2 text-white hover:bg-primary-600"
-          aria-label="Go Back"
-        >
-          <FaArrowLeft className="h-5 w-5" />
-        </Link>
+    <div className="mx-auto max-w-2xl px-3 py-4 sm:px-6 sm:py-6">
+      <Link
+        to="/admin/productlist"
+        className="mb-4 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+        aria-label="Go Back"
+      >
+        <FaArrowLeft className="h-5 w-5" />
+        Back
+      </Link>
 
-        <div className="flex w-full items-center justify-center py-5">
-          <FormContainer className="w-full max-w-lg">
-            <h1 className="mb-8 text-3xl font-bold">Edit Product</h1>
+      <div className="w-full py-4">
+        <FormContainer className="w-full max-w-lg mx-auto">
+          <h1 className="mb-6 text-2xl font-bold text-slate-800 sm:mb-8 sm:text-3xl">Edit Product</h1>
 
             {loadingUpdate && <Loader />}
             {errorUpdate && <Message type="error">{errorUpdate}</Message>}
@@ -193,9 +201,8 @@ export default function ProductEditScreen() {
                 </div>
               </form>
             )}
-          </FormContainer>
-        </div>
+        </FormContainer>
       </div>
-    </>
+    </div>
   );
 }

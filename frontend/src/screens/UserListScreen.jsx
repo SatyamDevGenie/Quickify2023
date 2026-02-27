@@ -1,12 +1,8 @@
 import { useEffect } from 'react';
-import {
-  IoCheckmarkCircleSharp,
-  IoCloseCircleSharp,
-  IoPencilSharp,
-  IoTrashBinSharp,
-} from 'react-icons/io5';
+import { IoPencilSharp, IoTrashBinSharp } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { deleteUser, fetchUsers } from '../store/slices/usersSlice';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
@@ -27,15 +23,20 @@ export default function UserListScreen() {
     }
   }, [dispatch, navigate, userInfo, deleteSuccess]);
 
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
+
   const deleteHandler = (id) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('Are you sure you want to delete this user? This cannot be undone.')) {
       dispatch(deleteUser(id));
+      toast.success('User deleted.');
     }
   };
 
   return (
     <>
-      <h1 className="mb-6 text-2xl font-bold text-gray-700 md:text-3xl">User Management</h1>
+      <h1 className="mb-6 text-2xl font-bold text-slate-800 md:text-3xl">User Management</h1>
 
       {loading ? (
         <Loader />

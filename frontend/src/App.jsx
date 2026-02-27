@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import HomeScreen from './screens/HomeScreen';
@@ -21,7 +22,7 @@ function App() {
   return (
     <BrowserRouter>
       <Header />
-      <main className="mt-[72px] flex min-h-[calc(100vh-72px)] flex-col bg-white py-6 px-6">
+      <main className="mt-16 sm:mt-[72px] flex min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-72px)] flex-col bg-slate-50 py-4 px-3 sm:py-6 sm:px-4 md:px-6">
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/products/:id" element={<ProductScreen />} />
@@ -42,6 +43,19 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        className="toast-container"
+      />
     </BrowserRouter>
   );
 }

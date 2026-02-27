@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { fetchUserById, updateUser, clearUpdateSuccess } from '../store/slices/usersSlice';
 import FormContainer from '../components/FormContainer';
 import Loader from '../components/Loader';
@@ -19,7 +20,12 @@ export default function UserEditScreen() {
   const { updateLoading: loadingUpdate, updateError: errorUpdate, updateSuccess: successUpdate } = useSelector((state) => state.users);
 
   useEffect(() => {
+    if (errorUpdate) toast.error(errorUpdate);
+  }, [errorUpdate]);
+
+  useEffect(() => {
     if (successUpdate) {
+      toast.success('User updated successfully.');
       dispatch(clearUpdateSuccess());
       navigate('/admin/userlist');
     } else {
@@ -39,15 +45,17 @@ export default function UserEditScreen() {
   };
 
   return (
-    <>
-      <Link to="/admin/userlist" className="mb-4 inline-block text-primary-500 hover:underline">
-        Go Back
+    <div className="mx-auto max-w-xl px-3 py-4 sm:py-6">
+      <Link
+        to="/admin/userlist"
+        className="mb-4 inline-block text-sm font-medium text-primary-600 hover:underline"
+      >
+        ← Back to users
       </Link>
 
-      <div className="flex w-full items-center justify-center py-5">
-        <FormContainer className="w-full max-w-[500px]">
-          <div className="rounded-lg bg-white px-8 py-10 shadow-lg">
-            <h1 className="mb-8 text-center text-2xl font-bold md:text-3xl">Edit User</h1>
+      <div className="w-full py-4">
+        <FormContainer className="w-full max-w-[500px] mx-auto">
+          <h1 className="mb-6 text-center text-2xl font-bold text-slate-800 sm:mb-8 md:text-3xl">Edit User</h1>
 
             {loadingUpdate && <Loader />}
             {errorUpdate && <Message type="error">{errorUpdate}</Message>}
@@ -101,9 +109,8 @@ export default function UserEditScreen() {
                 </div>
               </form>
             )}
-          </div>
         </FormContainer>
       </div>
-    </>
+    </div>
   );
 }

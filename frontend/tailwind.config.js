@@ -6,6 +6,12 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      screens: {
+        xs: '375px',
+      },
       colors: {
         primary: {
           50: '#f0fdfa',

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { IoAdd, IoPencilSharp, IoSearch, IoTrashBinSharp } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   fetchProducts,
   createProduct,
@@ -34,11 +35,20 @@ export default function ProductListScreen() {
     dispatch(clearCreateSuccess());
     if (!userInfo?.isAdmin) navigate('/login');
     if (successCreate && lastCreatedProduct) {
+      toast.success('Product created. You can edit it now.');
       navigate(`/admin/product/${lastCreatedProduct._id}/edit`);
     } else {
       dispatch(fetchProducts());
     }
   }, [dispatch, navigate, userInfo, successCreate, lastCreatedProduct]);
+
+  useEffect(() => {
+    if (errorDelete) toast.error(errorDelete);
+  }, [errorDelete]);
+
+  useEffect(() => {
+    if (errorCreate) toast.error(errorCreate);
+  }, [errorCreate]);
 
   const deleteHandler = (id) => {
     setDeleteId(id);
@@ -46,13 +56,17 @@ export default function ProductListScreen() {
   };
 
   const confirmDeleteHandler = () => {
-    if (deleteId) dispatch(deleteProduct(deleteId));
+    if (deleteId) {
+      dispatch(deleteProduct(deleteId));
+      toast.success('Product deleted.');
+    }
     setModalOpen(false);
     setDeleteId(null);
   };
 
   const createProductHandler = () => {
     dispatch(createProduct());
+    toast.info('Creating new product...');
   };
 
   const filteredProducts = (products || []).filter((p) =>
@@ -61,13 +75,13 @@ export default function ProductListScreen() {
 
   return (
     <>
-      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold md:text-3xl">Products</h1>
+      <div className="mb-4 flex flex-col gap-4 sm:mb-6 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-bold text-slate-800 md:text-3xl">Products</h1>
         <button
           type="button"
           onClick={createProductHandler}
           disabled={loadingCreate}
-          className="inline-flex items-center rounded bg-primary-500 px-4 py-2 text-white hover:bg-primary-600 disabled:opacity-50 md:px-6 md:py-3"
+          className="inline-flex w-full items-center justify-center rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-600 disabled:opacity-50 sm:w-auto md:px-6 md:py-3"
         >
           <IoAdd className="mr-2 h-5 w-5" />
           Create Product
@@ -80,9 +94,9 @@ export default function ProductListScreen() {
           placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded border border-gray-300 py-2 pl-3 pr-10 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="w-full rounded-lg border border-slate-300 py-2 pl-3 pr-10 text-sm transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 sm:text-base"
         />
-        <IoSearch className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+        <IoSearch className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
       </div>
 
       {loadingDelete && <Loader />}
@@ -176,22 +190,22 @@ export default function ProductListScreen() {
       )}
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-lg font-bold">Confirm Delete</h3>
-            <p className="mb-4">Are you sure you want to delete this product?</p>
-            <div className="flex gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-5 shadow-xl sm:p-6">
+            <h3 className="mb-2 text-lg font-bold text-slate-800">Confirm Delete</h3>
+            <p className="mb-4 text-sm text-slate-600">Are you sure you want to delete this product? This cannot be undone.</p>
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={confirmDeleteHandler}
-                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-600"
               >
                 Delete
               </button>
               <button
                 type="button"
                 onClick={() => { setModalOpen(false); setDeleteId(null); }}
-                className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-100"
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 Cancel
               </button>
