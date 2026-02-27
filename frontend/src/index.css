@@ -17,6 +17,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 /* Toast overrides for mobile */

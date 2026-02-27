@@ -38,7 +38,7 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed left-0 top-0 z-[99999] flex w-full flex-wrap items-center justify-between gap-3 bg-slate-900 px-4 py-3 shadow-lg sm:px-5 md:px-6 md:py-4">
+    <header className="fixed left-0 top-0 z-[99999] flex w-full flex-wrap items-center justify-between gap-3 bg-black px-4 py-3 shadow-lg sm:px-5 md:px-6 md:py-4">
       <Link
         to="/"
         className="text-lg font-bold tracking-tight text-white no-underline sm:text-xl md:text-2xl"
