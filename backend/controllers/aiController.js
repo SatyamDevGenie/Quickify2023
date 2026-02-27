@@ -101,3 +101,47 @@ Rewrite or generate a better description for this product.`;
 
   res.json({ description });
 });
+
+/**
+ * @desc   "Should I buy this?" – one-tap AI verdict (GROQ)
+ * @route  GET /api/ai/products/:id/buy-verdict
+ * @access public
+ */
+export const getBuyVerdict = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+    .select('name brand category price description reviews rating numReviews')
+    .lean();
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  const reviewsText =
+    product.reviews?.length > 0
+      ? product.reviews
+          .map((r) => `Rating ${r.rating}/5: ${r.comment}`)
+          .join('\n')
+      : 'No customer reviews yet.';
+
+  const systemPrompt = `You are a trusted friend giving honest shopping advice. Based only on the product details and reviews below, write a short verdict in 2-3 sentences. Say whether it's worth buying, for whom, and mention any real drawbacks from reviews. Be honest and specific. No fluff or generic praise. Write in a casual, helpful tone. Currency is INR (₹).`;
+
+  const userPrompt = `Product: ${product.name}
+Brand: ${product.brand || 'N/A'}
+Category: ${product.category || 'N/A'}
+Price: ₹${product.price}
+Average rating: ${product.rating ?? 0}/5 (${product.numReviews ?? 0} reviews)
+
+Description: ${product.description || 'N/A'}
+
+Customer reviews:
+${reviewsText}
+
+Give your honest "Should I buy this?" verdict in 2-3 sentences.`;
+
+  const verdict = await getCompletion([
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt },
+  ]);
+
+  res.json({ verdict });
+});

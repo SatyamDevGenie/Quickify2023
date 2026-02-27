@@ -24,6 +24,8 @@ export default function ProductScreen() {
   const [comment, setComment] = useState('');
   const [reviewSummary, setReviewSummary] = useState(null);
   const [reviewSummaryLoading, setReviewSummaryLoading] = useState(false);
+  const [buyVerdict, setBuyVerdict] = useState(null);
+  const [buyVerdictLoading, setBuyVerdictLoading] = useState(false);
 
   const { selectedProduct: product, productLoading: loading, productError: error } = useSelector((state) => state.products);
   const { userInfo } = useSelector((state) => state.auth);
@@ -69,6 +71,21 @@ export default function ProductScreen() {
     dispatch(addToCart({ id, qty }));
     toast.success('Added to cart');
     navigate(`/cart/${id}?qty=${qty}`);
+  };
+
+  const fetchBuyVerdict = async () => {
+    if (buyVerdictLoading || !product?._id) return;
+    setBuyVerdictLoading(true);
+    setBuyVerdict(null);
+    try {
+      const { data } = await api.get(`/ai/products/${product._id}/buy-verdict`);
+      setBuyVerdict(data.verdict || '');
+    } catch (err) {
+      toast.error('Could not get AI verdict. Try again.');
+      setBuyVerdict(null);
+    } finally {
+      setBuyVerdictLoading(false);
+    }
   };
 
   const submitHandler = (e) => {
@@ -146,6 +163,20 @@ export default function ProductScreen() {
                 >
                   {product.countInStock > 0 ? 'Add to Cart' : 'Out of Stock'}
                 </button>
+                <button
+                  type="button"
+                  onClick={fetchBuyVerdict}
+                  disabled={buyVerdictLoading}
+                  className="mt-3 w-full rounded-lg border border-slate-300 bg-white py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 sm:text-base"
+                >
+                  {buyVerdictLoading ? 'Getting AI verdict…' : 'Should I buy this?'}
+                </button>
+                {buyVerdict && (
+                  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/80 p-3">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-800">AI verdict</p>
+                    <p className="text-sm leading-relaxed text-slate-700">{buyVerdict}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
